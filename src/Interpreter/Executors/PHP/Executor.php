@@ -2,6 +2,8 @@
 
 namespace my127\Workspace\Interpreter\Executors\PHP;
 
+use Error;
+use RuntimeException;
 use my127\Workspace\Interpreter\Executor as InterpreterExecutor;
 
 class Executor implements InterpreterExecutor
@@ -52,7 +54,15 @@ class Executor implements InterpreterExecutor
         extract($this->globals);
         extract($args);
 
-        $ret = eval($script);
+        try {
+            $ret = eval($script);
+        } catch (Error $e) {
+            throw new RuntimeException(sprintf(
+                'Eval error "%s" when evaluating script: %s',
+                $e->getMessage(),
+                $script
+            ));
+        }
 
         chdir($this->environment['cwd']);
 
